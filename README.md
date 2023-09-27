@@ -22,7 +22,8 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 7. ???
 8. Profit!
 
-## Things I want to add
+## Todos
 
 - [ ] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
 - [ ] Add optimize button to optimize in analysis view
+- [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance

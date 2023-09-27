@@ -1,0 +1,5 @@
+{
+    "client_id":"very_identifying",
+    "client_secret":"very_secret"
+    "base_uri":"https://yoursite.com:5000",
+}

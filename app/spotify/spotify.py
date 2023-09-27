@@ -232,14 +232,17 @@ class Spotify:
             return
 
         uri = f"{self.api_base_uri}playlists/{playlist.id}/tracks"
-        track_uris = [f"spotify:track:{track.id}" for track in tracks]
-        body = {
-            "uris": track_uris
-        }
-
         auth_header = self.auth.get_auth_header()
-        response = requests.post(uri, headers=auth_header, json=body)
 
-        if response.status_code != 201:
-            raise Exception(f"Something went wrong trying to add tracks to a playlist: "
-                            f"{response.status_code}\n{response.content}")
+        # iterate over all tracks in chunks of 100
+        for i in range(0, len(tracks), 100):
+            track_uris = [f"spotify:track:{track.id}" for track in tracks[i:min(i + 100, len(tracks))]]
+            body = {
+                "uris": track_uris
+            }
+
+            response = requests.post(uri, headers=auth_header, json=body)
+
+            if response.status_code != 201:
+                raise Exception(f"Something went wrong trying to add tracks to a playlist: "
+                                f"{response.status_code}\n{response.content}")

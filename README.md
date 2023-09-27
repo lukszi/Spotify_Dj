@@ -5,7 +5,7 @@ Spotify DJ is a web application that creates optimized versions of your playlist
 Optimized meaning that the songs are ordered in a way that the transition between songs is as smooth as possible.
 
 ## Why
-Because I am too lazy to organize my playlists properly
+Because I can't be bothered to organize my playlists properly
 
 ## How
 The [Spotify API](https://developer.spotify.com/documentation/web-api/reference/get-audio-features) provides several audio features for each song. These features are used to calculate the similarity between two songs. The similarity is then used to create a graph of songs. 

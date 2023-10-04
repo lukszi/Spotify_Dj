@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import time
 from typing import List, Optional
-from wsgiref.util import request_uri
 
 import requests
+from requests import Response
 
 from app.exceptions.custom_exceptions import NotLoggedInException, RateLimitedException
-from app.spotify.model import PlayList, Track, TrackFeatures
 from app.session import SpotifyAuth
+from app.spotify.model import PlayList, Track, TrackFeatures
+from app.spotify.model.track import TrackSection
 
 
 class Spotify:
@@ -49,6 +51,33 @@ class Spotify:
 
             self.user_id = response.json()["id"]
         return self.user_id
+
+    def get_first_and_last_section_analysis(self, tracks: List[Track]):
+        """
+        Get the first and last section analysis of a track
+        """
+        for track in tracks:
+            auth_header = self.auth.get_auth_header()
+            fields = "fields=sections"
+            uri = f"{self.api_base_uri}audio-analysis/{track.id}?{fields}"
+
+            response: Optional[Response] = None
+            while response is None:
+                response = requests.get(uri, headers=auth_header)
+                if response.status_code == 429:
+                    response = None
+                    time.sleep(3)
+                    continue
+                if response.status_code != 200:
+                    raise Exception(f"Something went wrong trying to get the audio analysis of a track: "
+                                    f"{response.status_code}\n{response.content}")
+
+            body = response.json()
+            sections = body["sections"]
+            first_section = sections[0]
+            last_section = sections[-1]
+            track.section_analysis = (TrackSection(loudness=first_section["loudness"], tempo=first_section["tempo"]),
+                                      TrackSection(loudness=last_section["loudness"], tempo=last_section["tempo"]))
 
     def get_playlists(self) -> List[PlayList]:
         """

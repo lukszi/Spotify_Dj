@@ -5,7 +5,7 @@ import numpy as np
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
-from app.compute import build_song_adjacency_matrix, approximate_shp
+from app.compute import build_song_adjacency_matrix, approximate_shp, standardize
 from app.dependencies import ValidatedSession
 from app.spotify import Spotify
 from app.spotify.model import PlayList, Track
@@ -22,12 +22,14 @@ def optimize(playlist_id: str, session: ValidatedSession):
     tracks: List[Track] = spf.get_tracks(playlist_id)
     playlist.tracks = tracks
     spf.get_audio_features(tracks)
+    spf.get_first_and_last_section_analysis(tracks)
 
     # Check for empty playlists:
     if len(playlist.tracks) == 0:
         return f"<h1>Empty playlist: {playlist.name}</h1>"
 
     # Compute song adjacency matrix
+    standardize(tracks)
     song_adj_matrix: np.array = build_song_adjacency_matrix(playlist)
     shp = approximate_shp(song_adj_matrix)
     tracks = [playlist.tracks[i] for i in shp]
@@ -43,7 +45,7 @@ def optimize(playlist_id: str, session: ValidatedSession):
         if i == 0:
             pred_dist = 0
         else:
-            pred_dist = song_adj_matrix[i, i - 1]
+            pred_dist = song_adj_matrix[i - 1, i]
         name = tracks[i].name
         ret += f"<tr>\n<td>{i + 1}</td>\n<td>{name}</td>\n<td>{pred_dist}</td>\n</tr>\n"
     ret += "</table>"

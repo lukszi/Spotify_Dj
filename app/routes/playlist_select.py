@@ -7,7 +7,7 @@ import matplotlib.colors as mcolors
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
-from app.compute import build_song_adjacency_matrix
+from app.compute import build_song_adjacency_matrix, standardize
 from app.dependencies import ValidatedSession
 from app.spotify import Spotify
 from app.spotify.model import PlayList, Track
@@ -24,12 +24,14 @@ def playlist_select(playlist_id: str, session: ValidatedSession):
     tracks: List[Track] = spf.get_tracks(playlist_id)
     playlist.tracks = tracks
     spf.get_audio_features(tracks)
+    spf.get_first_and_last_section_analysis(tracks)
 
     # Check for empty playlists:
     if len(playlist.tracks) == 0:
         return f"<h1>Empty playlist: {playlist.name}</h1>"
 
     # Compute song adjacency matrix
+    standardize(tracks)
     song_adj_matrix: np.array = build_song_adjacency_matrix(playlist)
 
     pandas_index = [f"{i+1}. {track.name}" for i, track in enumerate(playlist.tracks)]

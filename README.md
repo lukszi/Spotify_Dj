@@ -30,3 +30,6 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 - [ ] Use a template engine or sth. to generate a better UI
 - [ ] Rewrite the How to use section
 - [ ] Make port and host configurable in the config file
+- [ ] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
+- [ ] Cache the results of the Spotify API to avoid being rate limited
+- [ ] Set values in distance matrix to infinity or a large number if they exceed a certain threshold  

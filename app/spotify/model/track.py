@@ -1,6 +1,18 @@
 from __future__ import annotations
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
+
+
+class TrackSection:
+    loudness: float
+    tempo: float
+
+    def __init__(self, loudness: float, tempo: float):
+        self.tempo = tempo
+        self.loudness = loudness
+
+    def as_list(self) -> List[float]:
+        return [self.loudness, self.tempo]
 
 
 class Track:
@@ -8,6 +20,7 @@ class Track:
     name: str
     href: str
     features: Optional[TrackFeatures]
+    section_analysis: Optional[Tuple[TrackSection, TrackSection]]
 
 
 class TrackFeatures:

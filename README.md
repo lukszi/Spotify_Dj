@@ -22,8 +22,6 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 1. ???
 1. Profit!
 
-## Todos
-
 
 # Todos
 List of things I want to do, but probably never will

@@ -14,13 +14,13 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 
 ## How to use
 1. Create a Spotify application [here](https://developer.spotify.com/dashboard/applications)
-2. Add your callback url, usually http://localhost:5000/authorization/callback to the application
-3. Configure the app/conf/spotify_api.json file with your callback url and the spotify client data
-4. run `pip3 install -r requirements.txt` to install the dependencies
-5. Run the app with `python3 app/run_server.py`
-6. Open the app in your browser at http://localhost:5000
-7. ???
-8. Profit!
+1. Add your callback url, usually http://localhost:5000/authorization/callback to the application
+1. Configure the app/conf/spotify_api.json file with the uri under which the server is reachable and the spotify client data
+1. run `pip3 install -r requirements.txt` to install the dependencies
+1. Run the app with `python3 app/run_server.py`
+1. Open the app in your browser at http://localhost:5000
+1. ???
+1. Profit!
 
 ## Todos
 

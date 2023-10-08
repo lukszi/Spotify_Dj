@@ -41,4 +41,5 @@ List of things I want to do, but probably never will
 - [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance
     - [ ] Maybe replace distance matrix entries exceeding x*sigma with a large value to avoid them being chosen
 ## Misc
+- [ ] Fix Issue with some "songs" not having an AudioAnalysis due to being news or podcasts ...
 - [ ] Figure out why it's so slow

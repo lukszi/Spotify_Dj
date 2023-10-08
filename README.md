@@ -34,8 +34,8 @@ List of things I want to do, but probably never will
 - [ ] Rewrite the How to use section
 - [ ] Document Architecture and Algorithm for when I come back to this in 2 years and have no idea what I did
 ## Rewrites
-- [ ] Make port and host configurable in the config file
-- [ ] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
+- [x] Make port and host configurable in the config file
+- [x] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
 - [ ] Cache the results of the Spotify API to avoid being rate limited
 - [ ] Better session handling (Delete session after it is invalidated, etc.)
 ## Algorithm

@@ -84,7 +84,7 @@ class SpotifyAuth:
             raise NotLoggedInException("expires_by not set in auth object")
         return datetime.datetime.now().timestamp() <= self.expires_by
 
-    def get_auth_header(self):
+    def get_auth_header(self) -> dict[str, str]:
         if not self.auth_valid():
             self.refresh_authorization()
         return {"Authorization": f"Bearer {self.access_token}"}

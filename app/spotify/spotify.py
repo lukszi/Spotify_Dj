@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import List, Optional
+from typing import List, Optional, Protocol
 
 import requests
 from requests import Response
@@ -28,28 +28,18 @@ class Spotify:
     def authorize(self, auth_code: str, redirect_to: str):
         self.auth.authorize(auth_code, redirect_to)
 
-    def get_user_id(self, retry: bool = True) -> str:
+    def get_user_id(self) -> str:
         """
-        Get the user id of the logged in user
+        Get the user id of the logged-in user
 
         :param retry: When True retries the request after refreshing the auth token
         """
         if not self.user_id:
-            auth_header = self.auth.get_auth_header()
-            response = requests.get(self.api_base_uri + "me", headers=auth_header)
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.get(self.api_base_uri + "me", headers=auth_header)
 
-            # Catch errors
-            if response.status_code == 401:
-                if retry:
-                    self.auth.refresh_authorization()
-                    return self.get_user_id(retry=False)
-                else:
-                    raise NotLoggedInException("User is not logged in")
-            if response.status_code == 429:
-                raise RateLimitedException
-            if response.status_code != 200:
-                raise Exception(f"Something went wrong trying to get user_id, status code: "
-                                f"{response.status_code}\n{response.content}")
+            error_message = "Something went wrong trying to get user_id"
+            response = self.__execute_api_request(request, [200], error_message=error_message)
 
             self.user_id = response.json()["id"]
         return self.user_id
@@ -59,20 +49,14 @@ class Spotify:
         Get the first and last section analysis of a track
         """
         for track in tracks:
-            auth_header = self.auth.get_auth_header()
             fields = "fields=sections"
             uri = f"{self.api_base_uri}audio-analysis/{track.id}?{fields}"
 
-            response: Optional[Response] = None
-            while response is None:
-                response = requests.get(uri, headers=auth_header)
-                if response.status_code == 429:
-                    response = None
-                    time.sleep(3)
-                    continue
-                if response.status_code != 200:
-                    raise Exception(f"Something went wrong trying to get the audio analysis of a track: "
-                                    f"{response.status_code}\n{response.content}")
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.get(uri, headers=auth_header)
+
+            error_message = "Something went wrong trying to get the audio analysis of a track"
+            response: Response = self.__execute_api_request(request, [200], error_message=error_message)
 
             body = response.json()
             sections = body["sections"]
@@ -83,18 +67,20 @@ class Spotify:
 
     def get_playlists(self) -> List[PlayList]:
         """
-        Get all playlists of the logged in user
+        Get all playlists of the logged-in user
         :return: All playlists of a user without the contained tracks
         """
-        auth_header = self.auth.get_auth_header()
         next_uri = f"{self.api_base_uri}me/playlists"
 
         playlists: List[PlayList] = []
         while next_uri is not None:
-            response = requests.get(next_uri, headers=auth_header)
-            if response.status_code != 200:
-                raise Exception(f"Something went wrong trying to read the playlists: "
-                                f"{response.status_code}\n{response.content}")
+
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.get(next_uri, headers=auth_header)
+
+            error_message = "Something went wrong trying to read the playlists"
+            response = self.__execute_api_request(request, error_message=error_message)
+
             body = response.json()
             items = body["items"]
             next_uri = body["next"]
@@ -112,19 +98,16 @@ class Spotify:
         :param playlist_id: id of the playlist
         :return: List of all playlist tracks
         """
-        auth_header = self.auth.get_auth_header()
-
         tracks: List[Track] = []
         track_fields = "fields=items(added_at, added_by, track(name, href, id)),next"
         next_uri = f"{self.api_base_uri}playlists/{playlist_id}/tracks?{track_fields}"
         # Iterate over all pages of tracks
         while next_uri is not None:
-            response = requests.get(next_uri, headers=auth_header)
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.get(next_uri, headers=auth_header)
 
-            # Error handling
-            if response.status_code != 200:
-                raise Exception(f"Something went wrong trying to read the tracks from a playlist: "
-                                f"{response.status_code}\n{response.content}")
+            error_message = "Something went wrong trying to read the tracks from a playlist"
+            response = self.__execute_api_request(request, error_message=error_message)
 
             # Add each track in page to list
             body = response.json()
@@ -152,13 +135,13 @@ class Spotify:
         while i < len(tracks) - 1:
             track_ids = ",".join([track.id for track in tracks[i:min(i + 100, len(tracks))]])
             i += 100
-            auth_header = self.auth.get_auth_header()
             uri = f"{self.api_base_uri}audio-features?ids={track_ids}"
 
-            response = requests.get(uri, headers=auth_header)
-            if response.status_code != 200:
-                raise Exception(f"Something went wrong trying to read the audio features from a track: "
-                                f"{response.status_code}\n{response.content}")
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.get(uri, headers=auth_header)
+
+            error_message = "Something went wrong trying to get audio features"
+            response = self.__execute_api_request(request, error_message=error_message)
 
             # Process features into the corresponding tracks
             body = response.json()
@@ -183,43 +166,32 @@ class Spotify:
         Fetches a single playlist by id
         :return: Playlist that has id playlist_id, without contained tracks
         """
-        auth_header = self.auth.get_auth_header()
         uri = f"{self.api_base_uri}playlists/{playlist_id}"
 
-        response = requests.get(uri, headers=auth_header)
-        if response.status_code != 200:
-            raise Exception(f"Something went wrong trying to read the playlists: "
-                            f"{response.status_code}\n{response.content}")
+        def request(auth_header: dict[str, str]) -> Response:
+            return requests.get(uri, headers=auth_header)
+
+        error_message = "Something went wrong trying to read the playlists"
+        response = self.__execute_api_request(request, error_message=error_message)
+
         playlist_response = response.json()
         playlist: PlayList = PlayList(name=playlist_response["name"], p_id=playlist_response["id"],
                                       tracks_ref=playlist_response["tracks"]["href"])
         return playlist
 
-    def execute_request(self, api_request) -> any:
-        """
-        Executes a simple get request to the spotify api and returns the json response
-        """
-        auth_header = self.auth.get_auth_header()
-        print(f"auth: {auth_header['Authorization']}")
-        uri = f"{self.api_base_uri}{api_request}"
-        response = requests.get(uri, auth_header)
-        if response.status_code != 200:
-            raise Exception(f"Request failed: "
-                            f"{response.status_code}\n{response.content}")
-        return response.json()
-
     def queue_tracks_in_order(self, tracks: List[Track]):
         """
         Queues a list of tracks in their given order. Only works with spotify premium though
         """
-        auth_header = self.auth.get_auth_header()
         uri = f"{self.api_base_uri}me/player/queue?uri="
         for track in tracks:
-            request = uri + track.href
-            response = requests.post(request, headers=auth_header)
-            if response.status_code != 204:
-                raise Exception(f"Something went wrong trying to queue a track: "
-                                f"{response.status_code}\n{response.content}")
+            uri = uri + track.href
+
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.post(uri, headers=auth_header)
+
+            error_message = "Something went wrong trying to queue a track"
+            _ = self.__execute_api_request(request, [204], error_message=error_message)
 
     def create_playlist(self, name: str, tracks: Optional[List[Track]] = None, check_if_name_exists: bool = True) \
             -> PlayList:
@@ -240,15 +212,16 @@ class Spotify:
             if len(pre_existing_lists) > 0:
                 return pre_existing_lists[0]
 
-        auth_header = self.auth.get_auth_header()
         uri = f"{self.api_base_uri}users/{self.get_user_id()}/playlists"
         body = {
             "name": name
         }
-        response = requests.post(uri, headers=auth_header, json=body)
-        if response.status_code != 201:
-            raise Exception(f"Something went wrong trying to create a playlist: "
-                            f"{response.status_code}\n{response.content}")
+
+        def request(auth_header: dict[str, str]) -> Response:
+            return requests.post(uri, headers=auth_header, json=body)
+
+        error_message = "Something went wrong trying to create a playlist"
+        response = self.__execute_api_request(request, [201], error_message=error_message)
 
         playlist_response = response.json()
         playlist: PlayList = PlayList(name=playlist_response["name"], p_id=playlist_response["id"],
@@ -266,7 +239,6 @@ class Spotify:
             return
 
         uri = f"{self.api_base_uri}playlists/{playlist.id}/tracks"
-        auth_header = self.auth.get_auth_header()
 
         # iterate over all tracks in chunks of 100
         for i in range(0, len(tracks), 100):
@@ -275,11 +247,11 @@ class Spotify:
                 "uris": track_uris
             }
 
-            response = requests.post(uri, headers=auth_header, json=body)
+            def request(auth_header: dict[str, str]) -> Response:
+                return requests.post(uri, headers=auth_header, json=body)
 
-            if response.status_code != 201:
-                raise Exception(f"Something went wrong trying to add tracks to a playlist: "
-                                f"{response.status_code}\n{response.content}")
+            error_message = "Something went wrong trying to add tracks to a playlist"
+            _ = self.__execute_api_request(request, [201], error_message=error_message)
 
     def fetch_and_initialize_playlist(self: Spotify, playlist_id: str) -> PlayList:
         """
@@ -291,3 +263,62 @@ class Spotify:
         self.get_audio_features(tracks)
         self.get_first_and_last_section_analysis(tracks)
         return playlist
+
+    def __execute_api_request(self, request: SpotifyRequest,
+                              acceptable_codes=None,
+                              max_attempts: int = 10,
+                              error_message: str = "Something went wrong trying to execute a Spotify API request") \
+            -> Response:
+        """
+        Executes a Spotify API request while capturing errors and retrying after being rate limited or unauthorized
+
+        :param request: Function that executes a requests request, returns the requests response and takes auth
+        :param acceptable_codes: The status codes that are acceptable
+        :param max_attempts: The maximum number of attempts to try
+        :param error_message: The error message to display if the request fails
+        :return: The response of the request
+        """
+        if acceptable_codes is None:
+            acceptable_codes = [200]
+        response = None
+        i = 1
+        while i <= max_attempts:
+            auth_header = self.auth.get_auth_header()
+
+            try:
+                response = request(auth_header)
+            except requests.exceptions.ConnectionError:
+                time.sleep(1 * i)
+                continue
+            except requests.exceptions.HTTPError:
+                time.sleep(1 * i)
+                continue
+            except requests.exceptions.Timeout:
+                time.sleep(1 * i)
+                continue
+            finally:
+                i += 1
+
+            status_code = response.status_code
+            if status_code in acceptable_codes:
+                return response
+            if status_code == 429:
+                if i == max_attempts:
+                    raise RateLimitedException(f"Rate limit exceeded: {response.status_code}\n{response.content}")
+                time.sleep(1 * i)
+            elif status_code == 401:
+                if i == max_attempts:
+                    raise NotLoggedInException(f"User is not logged in: {response.status_code}\n{response.content}")
+                self.auth.refresh_authorization()
+            else:
+                raise Exception(f"{error_message}: {response.status_code}\n{response.content}")
+            i += 1
+
+        if response is not None:
+            raise Exception(f"{error_message}: {response.status_code}\n{response.content}")
+        else:
+            raise Exception(error_message)
+
+
+class SpotifyRequest(Protocol):
+    def __call__(self, auth_header: dict[str, str]) -> Response: ...

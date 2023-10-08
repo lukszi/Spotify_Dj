@@ -31,8 +31,6 @@ class Spotify:
     def get_user_id(self) -> str:
         """
         Get the user id of the logged-in user
-
-        :param retry: When True retries the request after refreshing the auth token
         """
         if not self.user_id:
             def request(auth_header: dict[str, str]) -> Response:

@@ -73,7 +73,7 @@ def playlist_select(playlist_id: str, session: ValidatedSession):
     max_val: float = float(np.max(song_adj_matrix))
 
     # Style the DataFrame
-    styled_df = df.style.applymap(lambda val: f'background-color: {mcolors.rgb2hex(cmap(val / max_val)[:3])}')
+    styled_df = df.style.map(lambda val: f'background-color: {mcolors.rgb2hex(cmap(val / max_val)[:3])}')
 
     # Convert to HTML
     ret = styled_df.to_html()

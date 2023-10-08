@@ -40,3 +40,5 @@ List of things I want to do, but probably never will
 - [x] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
 - [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance
     - [ ] Maybe replace distance matrix entries exceeding x*sigma with a large value to avoid them being chosen
+## Misc
+- [ ] Figure out why it's so slow

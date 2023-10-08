@@ -289,38 +289,44 @@ class Spotify:
         if acceptable_codes is None:
             acceptable_codes = [200]
         response = None
-        i = 1
-        while i <= max_attempts:
+        attempt = 1
+        while attempt <= max_attempts:
             auth_header = self.auth.get_auth_header()
 
             try:
                 response = request(auth_header)
             except requests.exceptions.ConnectionError:
-                time.sleep(1 * i)
+                time.sleep(1 * attempt)
                 continue
             except requests.exceptions.HTTPError:
-                time.sleep(1 * i)
+                time.sleep(1 * attempt)
                 continue
             except requests.exceptions.Timeout:
-                time.sleep(1 * i)
+                time.sleep(1 * attempt)
                 continue
             finally:
-                i += 1
+                attempt += 1
 
             status_code = response.status_code
             if status_code in acceptable_codes:
                 return response
-            if status_code == 429:
-                if i == max_attempts:
+            elif status_code == 429:
+                if attempt == max_attempts:
                     raise RateLimitedException(f"Rate limit exceeded: {response.status_code}\n{response.content}")
-                time.sleep(1 * i)
+                # Check if response even has retry-after header if so wait for that time
+                if "Retry-After" in response.headers:
+                    retry_after = response.headers["Retry-After"]
+                    print(f"Ratelimited, waiting for {retry_after} seconds")
+                    time.sleep(int(retry_after))
+                else:
+                    print(f"Ratelimited, waiting for {5 * attempt} seconds")
+                    time.sleep(5 * attempt)
             elif status_code == 401:
-                if i == max_attempts:
+                if attempt == max_attempts:
                     raise NotLoggedInException(f"User is not logged in: {response.status_code}\n{response.content}")
                 self.auth.refresh_authorization()
             else:
                 raise Exception(f"{error_message}: {response.status_code}\n{response.content}")
-            i += 1
 
         if response is not None:
             raise Exception(f"{error_message}: {response.status_code}\n{response.content}")

@@ -6,7 +6,7 @@ import numpy as np
 from app.spotify.model.track import TrackSection
 
 
-def build_song_adjacency_matrix(playlist: PlayList) -> np.array:
+def build_song_adjacency_matrix(playlist: PlayList) -> np.ndarray:
     """
     Builds an adjacency matrix of a graph containing the distances between all tracks
 
@@ -34,13 +34,13 @@ def calculate_distance(origin_track: Track, target_track: Track) -> float:
     :param target_track:
     :return:
     """
-    origin_track_vector = create_track_vector(origin_track, start=False)
-    target_track_vector = create_track_vector(target_track, start=True)
+    origin_track_vector = create_feature_vector(origin_track, start=False)
+    target_track_vector = create_feature_vector(target_track, start=True)
 
     return np.linalg.norm(origin_track_vector-target_track_vector)
 
 
-def create_track_vector(track: Track, start: bool) -> np.array:
+def create_feature_vector(track: Track, start: bool) -> np.array:
     """
     Creates a vector describing a given track by its analysis
 

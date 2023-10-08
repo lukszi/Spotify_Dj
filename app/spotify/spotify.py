@@ -20,8 +20,10 @@ class Spotify:
     # API URIs
     api_base_uri = "https://api.spotify.com/v1/"
 
-    def __init__(self):
-        self.auth = SpotifyAuth()
+    def __init__(self, auth: Optional[SpotifyAuth] = None):
+        if auth is None:
+            auth = SpotifyAuth()
+        self.auth = auth
 
     def authorize(self, auth_code: str, redirect_to: str):
         self.auth.authorize(auth_code, redirect_to)
@@ -275,3 +277,14 @@ class Spotify:
             if response.status_code != 201:
                 raise Exception(f"Something went wrong trying to add tracks to a playlist: "
                                 f"{response.status_code}\n{response.content}")
+
+    def fetch_and_initialize_playlist(self: Spotify, playlist_id: str) -> PlayList:
+        """
+        Fetches all songs in a playlist, and initializes both the audio features and the first and last section analysis
+        """
+        playlist: PlayList = self.get_playlist(playlist_id)
+        tracks: List[Track] = self.get_tracks(playlist_id)
+        playlist.tracks = tracks
+        self.get_audio_features(tracks)
+        self.get_first_and_last_section_analysis(tracks)
+        return playlist

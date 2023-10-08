@@ -34,7 +34,7 @@ List of things I want to do, but probably never will
 ## Rewrites
 - [x] Make port and host configurable in the config file
 - [x] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
-- [ ] Cache the results of the Spotify API to avoid being rate limited
+- [x] Cache the results of the Spotify API to avoid being rate limited
 - [ ] Better session handling (Delete session after it is invalidated, etc.)
 ## Algorithm
 - [x] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix

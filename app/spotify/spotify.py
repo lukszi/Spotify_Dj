@@ -8,6 +8,7 @@ from requests import Response
 
 from app.exceptions.custom_exceptions import NotLoggedInException, RateLimitedException
 from app.session import SpotifyAuth
+from app.spotify.database import Database
 from app.spotify.model import PlayList, Track, TrackFeatures
 from app.spotify.model.track import TrackSection
 
@@ -16,6 +17,7 @@ class Spotify:
     # Auth stuff
     auth: SpotifyAuth
     user_id: Optional[str] = None
+    db: Database
 
     # API URIs
     api_base_uri = "https://api.spotify.com/v1/"
@@ -24,6 +26,7 @@ class Spotify:
         if auth is None:
             auth = SpotifyAuth()
         self.auth = auth
+        self.database = Database("spotify.db")
 
     def authorize(self, auth_code: str, redirect_to: str):
         self.auth.authorize(auth_code, redirect_to)
@@ -46,7 +49,9 @@ class Spotify:
         """
         Get the first and last section analysis of a track
         """
-        for track in tracks:
+
+        uninitialized_tracks = list(filter(lambda track: track.section_analysis is None, tracks))
+        for track in uninitialized_tracks:
             fields = "fields=sections"
             uri = f"{self.api_base_uri}audio-analysis/{track.id}?{fields}"
 
@@ -62,6 +67,7 @@ class Spotify:
             last_section = sections[-1]
             track.section_analysis = (TrackSection(loudness=first_section["loudness"], tempo=first_section["tempo"]),
                                       TrackSection(loudness=last_section["loudness"], tempo=last_section["tempo"]))
+            self.database.insert_track(track)
 
     def get_playlists(self) -> List[PlayList]:
         """
@@ -121,6 +127,9 @@ class Spotify:
                 if track.id:
                     tracks.append(track)
 
+        # Initialize tracks with data from database
+        self.database.bulk_initialize_tracks(tracks)
+
         return tracks
 
     def get_audio_features(self, tracks: List[Track]):
@@ -129,9 +138,10 @@ class Spotify:
         """
 
         features: List = []
+        uninitialized_tracks = list(filter(lambda track: track.features is None, tracks))
         i = 0
-        while i < len(tracks) - 1:
-            track_ids = ",".join([track.id for track in tracks[i:min(i + 100, len(tracks))]])
+        while i < len(uninitialized_tracks) - 1:
+            track_ids = ",".join([track.id for track in uninitialized_tracks[i:min(i + 100, len(uninitialized_tracks))]])
             i += 100
             uri = f"{self.api_base_uri}audio-features?ids={track_ids}"
 
@@ -147,7 +157,7 @@ class Spotify:
 
         for feature in features:
             track_id = feature["id"]
-            filtered_tracks = list(filter(lambda track: track.id == track_id, tracks))
+            filtered_tracks = list(filter(lambda track: track.id == track_id, uninitialized_tracks))
             if len(filtered_tracks) == 0:
                 raise Exception(f"Track with id {track_id} not found in feature responses")
             feature_object = TrackFeatures(acousticness=feature["acousticness"],

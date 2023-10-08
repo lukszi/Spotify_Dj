@@ -19,8 +19,8 @@ class Track:
     id: str
     name: str
     href: str
-    features: Optional[TrackFeatures]
-    section_analysis: Optional[Tuple[TrackSection, TrackSection]]
+    features: Optional[TrackFeatures] = None
+    section_analysis: Optional[Tuple[TrackSection, TrackSection]] = None
 
 
 class TrackFeatures:

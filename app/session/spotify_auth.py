@@ -8,9 +8,9 @@ import requests
 from app.exceptions.custom_exceptions import NotLoggedInException
 
 if __name__ == "__main__":
-    AUTH_FILE_PATH = "../conf/client.json"
+    AUTH_FILE_PATH = "../conf/spotify_api.json"
 else:
-    AUTH_FILE_PATH = "conf/client.json"
+    AUTH_FILE_PATH = "conf/spotify_api.json"
 
 
 class SpotifyAuth:

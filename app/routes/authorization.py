@@ -11,7 +11,7 @@ from app.dependencies import UnvalidatedSession, ValidatedSession, OptionalSessi
 from app.spotify import Spotify
 from app.session import Session, SpotifyAuth, persist_session
 
-with open("conf/client.json", "r") as f:
+with open("conf/spotify_api.json", "r") as f:
     config = json.load(f)
     base_uri = config["base_uri"]
     CALLBACK_URI = f"{base_uri}authorization/callback"

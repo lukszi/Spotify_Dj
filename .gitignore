@@ -1,4 +1,4 @@
-app/conf/client.json
+app/conf/spotify_api.json
 virtenv
 sessions
 .idea

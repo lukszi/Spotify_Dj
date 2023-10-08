@@ -36,6 +36,7 @@ List of things I want to do, but probably never will
 - [x] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
 - [x] Cache the results of the Spotify API to avoid being rate limited
 - [ ] Better session handling (Delete session after it is invalidated, etc.)
+- [ ] Bulk insert new songs into the database instead of inserting them one by one
 ## Algorithm
 - [x] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
 - [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance

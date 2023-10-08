@@ -225,6 +225,9 @@ class Spotify:
             -> PlayList:
         """
         Creates a new playlist with the given name and then adds tracks
+
+        :param name: Name of the new playlist
+        :param tracks: Tracks to add to the playlist
         :param check_if_name_exists: If true checks whether a playlist with the given name already exists and returns it
         :return: Created playlist or pre-existing playlist
         """

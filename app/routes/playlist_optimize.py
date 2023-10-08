@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 import pandas as pd
 import matplotlib.colors as mcolors
+from matplotlib.colors import LinearSegmentedColormap
 
 from app.compute import build_song_adjacency_matrix, approximate_shp, standardize
 from app.dependencies import ValidatedSession
@@ -68,13 +69,12 @@ def playlist_select(playlist_id: str, session: ValidatedSession):
     pandas_index: List[str] = [f"{i+1}. {track.name}" for i, track in enumerate(playlist.tracks)]
     df = pd.DataFrame(song_adj_matrix, pandas_index, pandas_index)
     # Create a colormap that goes from green at 0 to red at the max value
-    cmap = mcolors.LinearSegmentedColormap.from_list("", ["green", "red"])
+    cmap: LinearSegmentedColormap = mcolors.LinearSegmentedColormap.from_list("", ["green", "red"])
     max_val: float = float(np.max(song_adj_matrix))
 
     # Style the DataFrame
-    styled_df = df.style.map(lambda val: f'background-color: {mcolors.rgb2hex(cmap(val / max_val))}')
+    styled_df = df.style.applymap(lambda val: f'background-color: {mcolors.rgb2hex(cmap(val / max_val)[:3])}')
 
     # Convert to HTML
     ret = styled_df.to_html()
     return ret
-

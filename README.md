@@ -24,7 +24,10 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 
 ## Todos
 
-- [ ] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
+
+# Todos
+List of things I want to do, but probably never will
+## UI
 - [ ] Add optimize button to optimize in analysis view
 - [ ] Use a template engine or sth. to generate a better UI
 ## Documentation

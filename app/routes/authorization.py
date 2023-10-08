@@ -1,3 +1,7 @@
+"""
+Authorization routes for the application.
+"""
+
 import json
 
 from fastapi import APIRouter
@@ -17,6 +21,10 @@ router = APIRouter(prefix="/authorization")
 
 @router.get("/login")
 def login(session: OptionalSession):
+    """
+    Initiates the login process with spotify and at the same time creates a session on the server.
+    :param session: the session object, if it exists, otherwise None
+    """
     # Check if user is already logged in
     if session is not None:
         if session.auth.auth_valid():
@@ -43,6 +51,13 @@ def login(session: OptionalSession):
 
 @router.get("/callback")
 def callback(code: str, session: UnvalidatedSession):
+    """
+    URL that spotify redirects to after user has authenticated with spotify.
+    Finishes the OAuth2.0 process by exchanging the code for an access token.
+
+    :param code: the code returned from spotify
+    :param session: the session object
+    """
     spf: Spotify = Spotify()
     spf.auth = session.auth
     spf.authorize(code, CALLBACK_URI)

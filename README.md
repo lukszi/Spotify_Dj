@@ -26,10 +26,16 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 
 - [ ] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
 - [ ] Add optimize button to optimize in analysis view
-- [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance
 - [ ] Use a template engine or sth. to generate a better UI
+## Documentation
 - [ ] Rewrite the How to use section
+- [ ] Document Architecture and Algorithm for when I come back to this in 2 years and have no idea what I did
+## Rewrites
 - [ ] Make port and host configurable in the config file
 - [ ] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
 - [ ] Cache the results of the Spotify API to avoid being rate limited
-- [ ] Set values in distance matrix to infinity or a large number if they exceed a certain threshold  
+- [ ] Better session handling (Delete session after it is invalidated, etc.)
+## Algorithm
+- [x] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
+- [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance
+    - [ ] Maybe replace distance matrix entries exceeding x*sigma with a large value to avoid them being chosen

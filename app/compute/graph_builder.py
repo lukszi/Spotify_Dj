@@ -1,9 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 from app.spotify.model import PlayList, Track, TrackFeatures
 import numpy as np
 
 from app.spotify.model.track import TrackSection
+
+DEFAULT_COMPONENT_WEIGHTS = np.array([1]*7)
 
 
 def build_song_adjacency_matrix(playlist: PlayList) -> np.ndarray:
@@ -26,18 +28,21 @@ def build_song_adjacency_matrix(playlist: PlayList) -> np.ndarray:
     return song_adjacency
 
 
-def calculate_distance(origin_track: Track, target_track: Track) -> float:
+def calculate_distance(origin_track: Track, target_track: Track, component_weights: Optional[List[float]] = None) ->\
+        float:
     """
     Calculates the difference between two tracks
 
-    :param origin_track:
-    :param target_track:
-    :return:
+    :param origin_track: Track from which the distance is calculated
+    :param target_track: Track to which the distance is calculated
+    :param component_weights: Weights for the different components of the distance calculation if none resorts to unweighted
+    :return: Distance from origin_track to target_track
     """
+    component_weights = DEFAULT_COMPONENT_WEIGHTS if component_weights is None else component_weights
     origin_track_vector = create_feature_vector(origin_track, start=False)
     target_track_vector = create_feature_vector(target_track, start=True)
 
-    return np.linalg.norm(origin_track_vector-target_track_vector)
+    return np.linalg.norm((origin_track_vector-target_track_vector)*component_weights)
 
 
 def create_feature_vector(track: Track, start: bool) -> np.array:

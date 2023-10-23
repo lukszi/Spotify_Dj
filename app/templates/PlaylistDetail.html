@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <style>
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-container .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip-container:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <div class="container">
+        <h1>Playlist: {{ playlist.name }}</h1>
+        <table>
+            {% for row in song_adj_data %}
+            {% set outer_loop = loop %}
+                <tr>
+                    {% for cell in row %}
+                        {% set green = (1 - cell / max_val) * 255 %}
+                        {% set red = (cell / max_val) * 255 %}
+                        <td style="background-color: rgb({{ red | round(0) }}, {{ green | round(0) }}, 0); width: 50px; height: 50px; position: relative;">
+                            <div class="tooltip-container" style="width: 50px; height: 50px; position: relative; display: flex; align-items: center; justify-content: center;">
+                                <span>{{ "%.2f" | format(cell) }}</span>
+                                <span class="tooltiptext">{{ song_names[outer_loop.index0] }} <br/>-><br/> {{ song_names[loop.index0] }}</span>
+                            </div>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

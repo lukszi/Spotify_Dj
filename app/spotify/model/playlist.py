@@ -15,3 +15,7 @@ class PlayList:
         self.id = p_id
         self.name = name
 
+    def __len__(self):
+        if self.tracks is None:
+            return 0
+        return len(self.tracks)

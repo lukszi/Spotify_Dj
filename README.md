@@ -26,8 +26,12 @@ On This graph a short Hamiltonian Path is approximated to create a playlist with
 # Todos
 List of things I want to do, but probably never will
 ## UI
-- [ ] Add optimize button to optimize in analysis view
-- [ ] Use a template engine or sth. to generate a better UI
+- [ ] Use a template engine to generate a better UI
+  - [x] Replace playlist overview
+  - [x] Replace playlist view
+  - [ ] Replace playlist optimize
+- [ ] Add a loading indicator while data is being fetched from Spotify
+- [ ] Add a loading indicator while optimization is running
 ## Documentation
 - [ ] Rewrite the How to use section
 - [ ] Document Architecture and Algorithm for when I come back to this in 2 years and have no idea what I did

@@ -1,12 +1,8 @@
-from typing import List
-
 import numpy as np
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-import pandas as pd
-import matplotlib.colors as mcolors
-from matplotlib.colors import LinearSegmentedColormap
+from fastapi.templating import Jinja2Templates
 
 from app.compute import build_song_adjacency_matrix, approximate_shp, standardize
 from app.dependencies import ValidatedSession
@@ -14,6 +10,7 @@ from app.spotify import Spotify
 from app.spotify.model import PlayList
 
 router = APIRouter()
+templates = Jinja2Templates(directory="templates/")
 
 
 @router.get("/optimize/{playlist_id}")
@@ -52,7 +49,7 @@ def optimize(playlist_id: str, session: ValidatedSession):
 
 
 @router.get("/playlist_select/{playlist_id}", response_class=HTMLResponse)
-def playlist_select(playlist_id: str, session: ValidatedSession):
+def playlist_select(playlist_id: str, session: ValidatedSession, request: Request):
     # Fetch audio features
     spf: Spotify = Spotify(session.auth)
     playlist: PlayList = spf.fetch_and_initialize_playlist(playlist_id)
@@ -65,16 +62,15 @@ def playlist_select(playlist_id: str, session: ValidatedSession):
     standardize(playlist.tracks)
     song_adj_matrix: np.ndarray = build_song_adjacency_matrix(playlist)
 
-    # Visualize song adjacency matrix
-    pandas_index: List[str] = [f"{i+1}. {track.name}" for i, track in enumerate(playlist.tracks)]
-    df = pd.DataFrame(song_adj_matrix, pandas_index, pandas_index)
-    # Create a colormap that goes from green at 0 to red at the max value
-    cmap: LinearSegmentedColormap = mcolors.LinearSegmentedColormap.from_list("", ["green", "red"])
+    # Prepare data for the template
+    song_adj_data = song_adj_matrix.tolist()  # Convert np.ndarray to list
     max_val: float = float(np.max(song_adj_matrix))
+    song_names = [track.name for track in playlist.tracks]
 
-    # Style the DataFrame
-    styled_df = df.style.map(lambda val: f'background-color: {mcolors.rgb2hex(cmap(val / max_val)[:3])}')
-
-    # Convert to HTML
-    ret = styled_df.to_html()
-    return ret
+    return templates.TemplateResponse("PlaylistDetail.html", {
+        "request": request,
+        "playlist": playlist,
+        "song_adj_data": song_adj_data,
+        "max_val": max_val,
+        "song_names": song_names,
+    })

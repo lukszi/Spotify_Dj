@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta charset="utf-8">
+    <meta name="description" content="{{description}}">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- Use Bootstrap to style this page -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        @media (max-width: 1200px) {
+            .action-btn a {
+                display: block;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include 'navigation.html' %}
+{% block content %}{% endblock %}
+</body>
+
+</html>

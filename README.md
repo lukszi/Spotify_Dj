@@ -40,12 +40,15 @@ List of things I want to do, but probably never will
 - [x] Rewrite Spotify wrapper to execute requests centralized in a way that avoids crash on being rate limited
 - [x] Cache the results of the Spotify API to avoid being rate limited
 - [ ] Better session handling (Delete session after it is invalidated, etc.)
+  - [ ] Delete session after it is invalidated
+  - [ ] Redirect to proper URL after invalid session has been renewed
 - [ ] Bulk insert new songs into the database instead of inserting them one by one
 ## Algorithm
 - [x] Use the segments provided by the [Track Audio Analysis API](https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis) to create a more accurate distance matrix
 - [ ] Find a different optimization algorithm, since this one regularly yields transitions that have a rather large distance
     - [ ] Maybe replace distance matrix entries exceeding x*sigma with a large value to avoid them being chosen
     - [x] Weight component in distance calculation
-## Misc
+## Bugs
 - [ ] Fix Issue with some "songs" not having an AudioAnalysis due to being news or podcasts ...
 - [ ] Figure out why it's so slow
+- [ ] Fix number of songs in playlist overview always being shown as 0

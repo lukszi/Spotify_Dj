@@ -41,22 +41,61 @@
     </style>
     <div class="container">
         <h1>Playlist: {{ playlist.name }}</h1>
-        <table>
-            {% for row in song_adj_data %}
-            {% set outer_loop = loop %}
-                <tr>
-                    {% for cell in row %}
-                        {% set green = (1 - cell / max_val) * 255 %}
-                        {% set red = (cell / max_val) * 255 %}
-                        <td class="description-cell" style="background-color: rgb({{ red | round(0) }}, {{ green | round(0) }}, 0);">
-                            <div class="tooltip-container">
-                                <span>{{ "%.2f" | format(cell) }}</span>
-                                <span class="tooltiptext">{{ song_names[outer_loop.index0] }} <br/>-><br/> {{ song_names[loop.index0] }}</span>
-                            </div>
-                        </td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
+        <table id="playlist-table">
+            <!-- The table will be populated by JavaScript -->
         </table>
     </div>
+    <script lang="js">
+        // Convert the Jinja2 variables to JavaScript variables
+        let song_adj_data = {{ song_adj_data|tojson }};
+        let song_names = {{ song_names|tojson }};
+        let max_val = {{ max_val|tojson }};
+
+        // Get the table element
+        let table = document.getElementById('playlist-table');
+
+        // Create a Document Fragment
+        let docFrag = document.createDocumentFragment();
+
+        // Define a function to process a single row
+        function processRow(i) {
+            let row = document.createElement('tr');
+            for (let j = 0; j < song_adj_data[i].length; j++) {
+                let cell = song_adj_data[i][j];
+                let green = (1 - cell / max_val) * 255;
+                let red = (cell / max_val) * 255;
+
+                let td = document.createElement('td');
+                td.className = 'description-cell';
+                td.style.backgroundColor = `rgb(${Math.round(red)}, ${Math.round(green)}, 0)`;
+
+                let tooltipContainer = document.createElement('div');
+                tooltipContainer.className = 'tooltip-container';
+
+                let span = document.createElement('span');
+                span.textContent = cell.toFixed(2);
+                tooltipContainer.appendChild(span);
+
+                let tooltipText = document.createElement('span');
+                tooltipText.className = 'tooltiptext';
+                tooltipText.innerHTML = `${song_names[i]} <br/>-><br/> ${song_names[j]}`;
+                tooltipContainer.appendChild(tooltipText);
+
+                td.appendChild(tooltipContainer);
+                row.appendChild(td);
+            }
+            docFrag.appendChild(row);
+        }
+
+        // Define a function to process all rows
+        function processAllRows() {
+            for (let i = 0; i < song_adj_data.length; i++) {
+                processRow(i);
+            }
+            table.appendChild(docFrag);
+        }
+
+        // Use requestAnimationFrame to avoid blocking the main thread
+        requestAnimationFrame(processAllRows);
+    </script>
 {% endblock %}

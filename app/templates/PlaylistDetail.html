@@ -78,10 +78,11 @@
 
                 let tooltipText = document.createElement('span');
                 tooltipText.className = 'tooltiptext';
-                tooltipText.innerHTML = `${song_names[i]} <br/>-><br/> ${song_names[j]}`;
                 tooltipContainer.appendChild(tooltipText);
 
                 td.appendChild(tooltipContainer);
+                td.onmouseover = generate_tooltip_text;
+                td.onmouseout = delete_tooltip_text;
                 row.appendChild(td);
             }
             docFrag.appendChild(row);
@@ -93,6 +94,20 @@
                 processRow(i);
             }
             table.appendChild(docFrag);
+        }
+
+        // Generate tooltip text for a cell on mouseover
+        function generate_tooltip_text() {
+            let tooltipTextSpan = this.querySelector('.tooltiptext');
+            let i = this.parentNode.rowIndex;
+            let j = this.cellIndex;
+            tooltipTextSpan.innerHTML = `${song_names[i]} <br/>-><br/> ${song_names[j]}`;
+        }
+
+        // Delete tooltip text on mouseout
+        function delete_tooltip_text() {
+            let tooltipTextSpan = this.querySelector('.tooltiptext');
+            tooltipTextSpan.innerHTML = '';
         }
 
         // Use requestAnimationFrame to avoid blocking the main thread

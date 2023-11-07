@@ -1,116 +1,122 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-    <style>
-        .tooltip-container {
-            width: 50px;
-            height: 50px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+<style>
+    .tooltip-container {
+        width: 50px;
+        height: 50px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tooltip-container .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip-container:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .description-cell {
+        width: 50px;
+        height: 50px;
+        position: relative;
+    }
+</style>
+<div class="container">
+    <h1>Playlist: {{ playlist.name }}</h1>
+    <table id="playlist-table">
+        <!-- The table will be populated by JavaScript -->
+    </table>
+</div>
+<script lang="js">
+    // Convert the Jinja2 variables to JavaScript variables
+    let song_adj_data = {{ song_adj_data | tojson }};
+    let song_names = {{ song_names | tojson }};
+    let max_val = {{ max_val | tojson }};
+
+    // Get the table element
+    let table = document.getElementById('playlist-table');
+
+    // Create a Document Fragment
+    let docFrag = document.createDocumentFragment();
+
+    // Define a function to process a single row
+    function processRow(i) {
+        let row = document.createElement('tr');
+        for (let j = 0; j < song_adj_data[i].length; j++) {
+            let cell = song_adj_data[i][j];
+            let green = (1 - cell / max_val) * 255;
+            let red = (cell / max_val) * 255;
+
+            let td = document.createElement('td');
+            td.className = 'description-cell';
+            td.style.backgroundColor = `rgb(${Math.round(red)}, ${Math.round(green)}, 0)`;
+
+            let tooltipContainer = document.createElement('div');
+            tooltipContainer.className = 'tooltip-container';
+
+            let span = document.createElement('span');
+            span.textContent = cell.toFixed(2);
+            tooltipContainer.appendChild(span);
+
+            let tooltipText = document.createElement('span');
+            tooltipText.className = 'tooltiptext';
+            tooltipContainer.appendChild(tooltipText);
+
+            td.appendChild(tooltipContainer);
+            row.appendChild(td);
         }
+        docFrag.appendChild(row);
+    }
 
-        .tooltip-container .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
+    // Define a function to process all rows
+    function processAllRows() {
+        for (let i = 0; i < song_adj_data.length; i++) {
+            processRow(i);
         }
+        table.appendChild(docFrag);
+    }
 
-        .tooltip-container:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
+        function generateToolTipText (e) {
+        let td = e.target.closest('td.description-cell');
+        if (!td) return;
+        let tooltipTextSpan = td.querySelector('.tooltiptext');
+        let i = td.parentNode.rowIndex;
+        let j = td.cellIndex;
+        tooltipTextSpan.innerHTML = `${song_names[i]} <br/>-><br/> ${song_names[j]}`;
+    }
 
-        .description-cell {
-            width: 50px;
-            height: 50px;
-            position: relative;
-        }
-    </style>
-    <div class="container">
-        <h1>Playlist: {{ playlist.name }}</h1>
-        <table id="playlist-table">
-            <!-- The table will be populated by JavaScript -->
-        </table>
-    </div>
-    <script lang="js">
-        // Convert the Jinja2 variables to JavaScript variables
-        let song_adj_data = {{ song_adj_data|tojson }};
-        let song_names = {{ song_names|tojson }};
-        let max_val = {{ max_val|tojson }};
+    // Dynamic tooltip generation
+    function deleteToolTipText(e) {
+        let td = e.target.closest('td.description-cell');
+        if (!td) return;
+        let tooltipTextSpan = td.querySelector('.tooltiptext');
+        tooltipTextSpan.innerHTML = '';
+    }
 
-        // Get the table element
-        let table = document.getElementById('playlist-table');
+    table.onmouseover = generateToolTipText;
+    table.onmouseout = deleteToolTipText;
 
-        // Create a Document Fragment
-        let docFrag = document.createDocumentFragment();
+    // Use requestAnimationFrame to avoid blocking the main thread
+    requestAnimationFrame(processAllRows);
 
-        // Define a function to process a single row
-        function processRow(i) {
-            let row = document.createElement('tr');
-            for (let j = 0; j < song_adj_data[i].length; j++) {
-                let cell = song_adj_data[i][j];
-                let green = (1 - cell / max_val) * 255;
-                let red = (cell / max_val) * 255;
 
-                let td = document.createElement('td');
-                td.className = 'description-cell';
-                td.style.backgroundColor = `rgb(${Math.round(red)}, ${Math.round(green)}, 0)`;
-
-                let tooltipContainer = document.createElement('div');
-                tooltipContainer.className = 'tooltip-container';
-
-                let span = document.createElement('span');
-                span.textContent = cell.toFixed(2);
-                tooltipContainer.appendChild(span);
-
-                let tooltipText = document.createElement('span');
-                tooltipText.className = 'tooltiptext';
-                tooltipContainer.appendChild(tooltipText);
-
-                td.appendChild(tooltipContainer);
-                td.onmouseover = generate_tooltip_text;
-                td.onmouseout = delete_tooltip_text;
-                row.appendChild(td);
-            }
-            docFrag.appendChild(row);
-        }
-
-        // Define a function to process all rows
-        function processAllRows() {
-            for (let i = 0; i < song_adj_data.length; i++) {
-                processRow(i);
-            }
-            table.appendChild(docFrag);
-        }
-
-        // Generate tooltip text for a cell on mouseover
-        function generate_tooltip_text() {
-            let tooltipTextSpan = this.querySelector('.tooltiptext');
-            let i = this.parentNode.rowIndex;
-            let j = this.cellIndex;
-            tooltipTextSpan.innerHTML = `${song_names[i]} <br/>-><br/> ${song_names[j]}`;
-        }
-
-        // Delete tooltip text on mouseout
-        function delete_tooltip_text() {
-            let tooltipTextSpan = this.querySelector('.tooltiptext');
-            tooltipTextSpan.innerHTML = '';
-        }
-
-        // Use requestAnimationFrame to avoid blocking the main thread
-        requestAnimationFrame(processAllRows);
-    </script>
+</script>
 {% endblock %}

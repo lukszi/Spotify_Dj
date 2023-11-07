@@ -1,6 +1,6 @@
 import numpy as np
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, WebSocket
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -48,19 +48,10 @@ def optimize(playlist_id: str, session: ValidatedSession):
     return HTMLResponse(ret)
 
 
-@router.get("/playlist_select/{playlist_id}", response_class=HTMLResponse)
-def playlist_select(playlist_id: str, session: ValidatedSession, request: Request):
-    # Fetch audio features
-    spf: Spotify = Spotify(session.auth)
-    playlist: PlayList = spf.fetch_and_initialize_playlist(playlist_id)
+@router.get("/optimize/{playlist_id}/progress")
+def get_progress_page(process_id: str, session: ValidatedSession):
+    pass
 
-    # Check for empty playlists:
-    if len(playlist.tracks) == 0:
-        return f"<h1>Empty playlist: {playlist.name}</h1>"
-
-    # Compute song adjacency matrix
-    standardize(playlist.tracks)
-    song_adj_matrix: np.ndarray = build_song_adjacency_matrix(playlist)
 
     # Prepare data for the template
     song_adj_data = song_adj_matrix.tolist()  # Convert np.ndarray to list

@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 from fastapi import APIRouter, WebSocket
@@ -53,15 +55,9 @@ def get_progress_page(process_id: str, session: ValidatedSession):
     pass
 
 
-    # Prepare data for the template
-    song_adj_data = song_adj_matrix.tolist()  # Convert np.ndarray to list
-    max_val: float = float(np.max(song_adj_matrix))
-    song_names = [track.name for track in playlist.tracks]
-
-    return templates.TemplateResponse("PlaylistDetail.html", {
-        "request": request,
-        "playlist": playlist,
-        "song_adj_data": song_adj_data,
-        "max_val": max_val,
-        "song_names": song_names,
-    })
+@router.websocket("/optimize/{playlist_id}/progress")
+async def get_progress(process_id: str, session: ValidatedSession, websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        time.sleep(1)
+        await websocket.send_json({"progress": 0.5})

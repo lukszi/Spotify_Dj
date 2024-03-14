@@ -17,7 +17,7 @@ def build_song_adjacency_matrix(playlist: PlayList) -> np.ndarray:
     """
     tracks: List[Track] = playlist.tracks
     n: int = len(tracks)
-    song_adjacency: np.arry = np.zeros((n, n), dtype=np.float32)
+    song_adjacency: np.array = np.zeros((n, n), dtype=np.float32)
 
     # outer iterator iterates over all tracks in playlist
     for outer_track_iterator in range(0, len(tracks)):

@@ -4,7 +4,7 @@ from app.spotify.model import Track, TrackFeatures
 from app.spotify.model.track import TrackSection
 
 
-def create_feature_vector(track: Track, start: bool) -> np.array:
+def create_feature_vector(track: Track, start: bool = False) -> np.array:
     """
     Creates a vector describing a given track by its analysis
 

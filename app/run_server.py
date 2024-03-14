@@ -5,7 +5,8 @@ import uvicorn
 from fastapi.responses import RedirectResponse
 
 from app.exceptions import NotLoggedInException, not_logged_in_exception_handler
-from app.routes import authorization_router, playlist_overview_router, playlist_optimize_router, playlist_detail_router
+from app.routes import authorization_router, playlist_overview_router, playlist_optimize_router, playlist_detail_router, \
+    playlist_cluster_router
 
 # Read config file
 with open("conf/server_config.json", "r") as config_file:
@@ -18,6 +19,7 @@ app.include_router(authorization_router)
 app.include_router(playlist_overview_router)
 app.include_router(playlist_optimize_router)
 app.include_router(playlist_detail_router)
+app.include_router(playlist_cluster_router)
 
 
 @app.get("/")

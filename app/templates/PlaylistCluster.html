@@ -4,8 +4,9 @@
     <div class="container">
         <h1>Clustered Playlist</h1>
         <p>Here are the calculated clusters for this playlist</p>
-        {% for cluster in clusters %}
+        {% for label, cluster in clusters.items() %}
         <div class="cluster_container">
+            <h2>Cluster {{ label }}</h2>
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>

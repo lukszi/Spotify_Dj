@@ -1,10 +1,9 @@
 from typing import List, Optional
 
-from app.spotify.model import PlayList, Track
 import numpy as np
-from app.compute.features import create_feature_vector
 
-from app.spotify.model.track import TrackSection
+from app.compute.features import create_feature_vector
+from app.spotify.model import PlayList, Track
 
 DEFAULT_COMPONENT_WEIGHTS = np.array([1]*7)
 

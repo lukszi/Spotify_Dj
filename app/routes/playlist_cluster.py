@@ -4,7 +4,8 @@ from fastapi.templating import Jinja2Templates
 
 import numpy as np
 
-from app.compute import standardize, create_feature_vector, cluster_k_means, build_song_adjacency_matrix, cluster_dbscan
+from app.compute import standardize, create_feature_vector, cluster_k_means, build_song_adjacency_matrix, \
+    cluster_dbscan, principal_component_analysis
 
 from app.dependencies import ValidatedSession
 from app.spotify import Spotify
@@ -31,6 +32,7 @@ def playlist_k_means(playlist_id: str, session: ValidatedSession, request: Reque
     # build vector for each track
     song_vectors = [create_feature_vector(track) for track in playlist.tracks]
     song_vectors = np.array(song_vectors)
+    song_vectors = principal_component_analysis(song_vectors, 6)
 
     # cluster the playlist
     print("Clustering playlist")
@@ -87,5 +89,5 @@ def dbscan_playlist(playlist_id: str, session: ValidatedSession, request: Reques
         "request": request,
         "clusters": song_indices_by_cluster,
         "songs": playlist.tracks,
-        "distances": [0*len(playlist.tracks)]
+        "distances": [0 * len(playlist.tracks)]
     })

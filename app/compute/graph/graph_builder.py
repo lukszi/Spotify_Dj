@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from app.spotify.model import PlayList, Track, TrackFeatures
 import numpy as np
 
-from app.spotify.model.track import TrackSection
+from app.compute.features import create_feature_vector
+from app.spotify.model import PlayList, Track
 
 DEFAULT_COMPONENT_WEIGHTS = np.array([1]*7)
 
@@ -17,7 +17,7 @@ def build_song_adjacency_matrix(playlist: PlayList) -> np.ndarray:
     """
     tracks: List[Track] = playlist.tracks
     n: int = len(tracks)
-    song_adjacency: np.arry = np.zeros((n, n), dtype=np.float32)
+    song_adjacency: np.array = np.zeros((n, n), dtype=np.float32)
 
     # outer iterator iterates over all tracks in playlist
     for outer_track_iterator in range(0, len(tracks)):
@@ -43,27 +43,3 @@ def calculate_distance(origin_track: Track, target_track: Track, component_weigh
     target_track_vector = create_feature_vector(target_track, start=True)
 
     return np.linalg.norm((origin_track_vector-target_track_vector)*component_weights)
-
-
-def create_feature_vector(track: Track, start: bool) -> np.array:
-    """
-    Creates a vector describing a given track by its analysis
-
-    :param track: track to be vectorized
-    :param start: whether to use the start or end section analysis
-    :return:
-    """
-    features: TrackFeatures = track.features
-    if features is None:
-        raise ValueError(f"Track {track.id} has no features")
-
-    if track.section_analysis is None:
-        raise ValueError(f"Track {track.id} has no section analysis")
-    section_analysis: TrackSection
-    if start:
-        section_analysis = track.section_analysis[0]
-    else:
-        section_analysis = track.section_analysis[1]
-
-    track_vector = np.array(features.as_list()+section_analysis.as_list(), dtype=np.float32)
-    return track_vector

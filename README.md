@@ -55,7 +55,10 @@ List of things I want to do, but probably never will
     - [ ] Maybe replace distance matrix entries exceeding x*sigma with a large value to avoid them being chosen
     - [x] Weight component in distance calculation
 - [ ] Cluster songs by similarity and optimize within clusters instead of globally
+  - [x] Implement a clustering algorithm
+  - [ ] Implement a way to optimize within clusters
+- [x] Reduce data dimensionality using PCA
 ## Bugs
 - [ ] Fix Issue with some "songs" not having an AudioAnalysis due to being news or podcasts ...
-- [ ] Figure out why it's so slow
+- [x] Figure out why it's so slow
 - [ ] Fix number of songs in playlist overview always being shown as 0
